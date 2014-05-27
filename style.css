@@ -1,0 +1,59 @@
+
+/* Reset {{{ */
+html, body, body div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, figure, footer, header, menu, nav, section, time, mark, audio, video, details, summary {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font-weight: normal;
+	vertical-align: baseline;
+	background: transparent;
+}
+
+article, aside, figure, footer, header, nav, section, details, summary {display: block;}
+
+/* consider resetting the default cursor: https://gist.github.com/murtaugh/5247154 */
+
+/* Apply a natural box layout model to all elements: http://paulirish.com/2012/box-sizing-border-box-ftw/ */
+*, *:before, *:after {box-sizing: border-box; }
+ 
+sub, sup {font-size: 75%; line-height: 0; position: relative;}
+sup {top: -0.5em;}
+sub {bottom: -0.25em;}
+
+pre {
+    white-space: pre; /* CSS2 */
+    white-space: pre-wrap; /* CSS 2.1 */
+    white-space: pre-line; /* CSS 3 (and 2.1 as well, actually) */
+    word-wrap: break-word; /* IE */
+}
+
+select, input, textarea {font: 99% sans-serif;}
+
+table {font-size: inherit; font: 100%;}
+
+small {font-size: 85%;}
+
+strong {font-weight: bold;}
+
+td, td img {vertical-align: top;} 
+
+del {text-decoration: line-through;}
+
+blockquote:before, 
+blockquote:after, 
+q:before, 
+q:after {content: ''; content: none;}
+
+/* }}} */
+
+body, html {
+  height: 100%;
+  width: 100%;
+}
+
+body canvas {
+  cursor: none;
+  display: block;
+}
+
