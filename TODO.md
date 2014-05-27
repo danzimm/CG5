@@ -1,7 +1,6 @@
 # Base Framework
 - paths for views i.e. create a bean - allow them to mutate just one leg at a time
 - shadows - inset + outset
-- animations - animate straight attributes w/o setter
 - colors - create color object
 - point,rect,size classes
 

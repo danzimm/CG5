@@ -19,7 +19,6 @@ where `[0,0,100,100]` stand for the rect of the view. You can do many other thin
 ## Roadmap
 - Add paths for views. In other words currently views can only be rectangles (of course you can create your own `drawRect` method in order to draw some other shape, but I want to make this easier), or rounded rectangles, but I want the views to be able to have any sort of boundary one would like (creating the boundaries with different types of curves, quadratic, cubic, etc.). Currently I have an idea how to do this, but need to figure out how to make a simpler API.
 - Shadows on views. Both inset and outset. Different colors, different sizes. This, at first glance to me is going to be very hard!
-- Animate object members. Currently one can only animate with a some sort of setter function (this is because the views themselves are built upon a robust property system that allows some pretty cool modularity to the views). This should be done in the near future.
 - Colors. I need to make a color object which has an `array()` method. Using regex to fetch an array representing a color is *not* very efficient, especially when animating. This shouldn't be hard but is coupled with the issue below.
 - Proper classes for point, rect, size, etc.. Currently I have these objects as a simple javascript `Object`. I want to make them more robust similar to views.
 

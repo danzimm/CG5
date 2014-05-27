@@ -24,11 +24,12 @@ window.onload = function() {
         var radius = view.radius();
         var from = view.center().array();
         var to = CG5.pointRandom(CG5.rectInset(CG5.screen, [radius,radius,radius,radius])).array();
-        CG5.animate(view, "setCenter").setFrom(from)
-          .setTo(to).setDuration(500).tweener(CG5.tweens.flatten().random(2))
+        var animation = CG5.animate(view, "setCenter").setFrom(from)
+          .setTo(to).setDuration(900).tweener(CG5.tweens.flatten().random(2))
           .after(function() {
           setTimeout(moveToRandomPoint, 300);
         }).go();
+        //CG5.animate(animation, "_duration").setFrom(500).setTo(900).go();
         /*
         CG5.animate(view, "setBackgroundColor").setFrom(CG5.colorArray(view.backgroundColor())).setTo(colors.random())
           .setDuration(500).go();

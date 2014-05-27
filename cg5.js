@@ -560,7 +560,13 @@ var CG5 = (function() {
       if (opts.hasOwnProperty("updater")) {
         this.setUpdater(opts.updater);
       }
-      var tmp = target[createGetter(keypath)](), goodTmp = typeof tmp === "number";
+      var member = target[createGetter(keypath)], tmp, goodTmp;
+      if (typeof member === "function") {
+        tmp = member.apply(target);
+      } else {
+        tmp = member;
+      }
+      goodTmp = typeof tmp === "number";
       this.setFrom( (opts.hasOwnProperty("from") ? opts.from : goodTmp ? tmp : 0) ); // TODO: 3 init with array type?
       this.setChange( (opts.hasOwnProperty("to") ? opts.to - this.from() : (goodTmp ? tmp : 0)  - this.from()) );
     };
@@ -612,7 +618,23 @@ var CG5 = (function() {
       return this.setChange(change);
     });
     animation.createSource = function(ani) { // TODO: 4 make sources have targets, I hate not having this here - on hold, this is already a mess gah
+      var setterBased = typeof ani.target[ani._keypath] === "function";
       if (Array.isArray(ani._change)) {
+        if (setterBased) {
+          return function() {
+            var time = Date.now() - ani.start;
+            if (time >= ani._duration) {
+              time = ani._duration;
+              ani.stop();
+            }
+            var ret = [];
+            ani._change.forEach(function(comp, i) { // TODO: 3 check performance?
+              ret.push(ani._tweener[i](time, ani._from[i], comp, ani._duration));
+            });
+            ani.target[ani._keypath](ret, true);
+            ani._updater();
+          };
+        }
         return function() {
           var time = Date.now() - ani.start;
           if (time >= ani._duration) {
@@ -623,7 +645,18 @@ var CG5 = (function() {
           ani._change.forEach(function(comp, i) { // TODO: 3 check performance?
             ret.push(ani._tweener[i](time, ani._from[i], comp, ani._duration));
           });
-          ani.target[ani._keypath](ret, true);
+          ani.target[ani._keypath] = ret;
+          ani._updater();
+        };
+      }
+      if (setterBased) {
+        return function() {
+          var time = Date.now() - ani.start;
+          if (time >= ani._duration) {
+            time = ani._duration;
+            ani.stop();
+          }
+          ani.target[ani._keypath](ani._tweener(time, ani._from, ani._change, ani._duration), true);
           ani._updater();
         };
       }
@@ -633,7 +666,7 @@ var CG5 = (function() {
           time = ani._duration;
           ani.stop();
         }
-        ani.target[ani._keypath](ani._tweener(time, ani._from, ani._change, ani._duration), true);
+        ani.target[ani._keypath] = ani._tweener(time, ani._from, ani._change, ani._duration);
         ani._updater();
       };
     };
@@ -644,6 +677,7 @@ var CG5 = (function() {
       this.start = Date.now();
       this.source = animation.createSource(this);
       GFXRunloop.addSource(this.source);
+      return this;
     };
     animation.prototype.stop = function() {
       GFXRunloop.removeSource(this.source);
@@ -653,6 +687,7 @@ var CG5 = (function() {
       if (this.after()) {
         this.after()();
       }
+      return this;
     };
     return animation;
   }(that));
@@ -888,11 +923,6 @@ var CG5 = (function() {
       if (CG5.hasView(this)) {
         CG5.setNeedsDisplay(all);
       }
-    };
-
-    view.prototype.cascade = function(cb) {
-      cb.apply(this);
-      return this;
     };
 
     return view;
