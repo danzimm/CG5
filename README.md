@@ -32,3 +32,12 @@ If you want to help out then fork, create a branch with your feature/fix and the
 ## License
 Check out LICENSE.md
 
+## Special Thanks
+Thanks to [Robert Penner](http://www.robertpenner.com) for his write ups on easing functions. I use code that he wrote in a portion of his book that he has published onto the internet (Chapter 7 on tweening). He's clearly a very intelligent guy, and you guys should read the code he has written. As far as I can tell, he wrote the easing functions that jQuery uses. Thanks a bunch Robert!
+
+Thanks to [JD Hartley](http://jdhartley.me) for teaching me how to write javascript properly and giving me free code reviews. Also thanks for sushi. One of the best web devs I have ever met.
+
+Thanks to [John Heaton](http://jheat.me) for teaching me a great bit about how javascript works internally. He's one of the greatest coders I have ever met.
+
+Thanks to all my other coder friends who have taught me a thing or two along the way.
+
