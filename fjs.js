@@ -1,19 +1,9 @@
 
-Array.prototype.map = function(cb) {
-  var ret = [], tmp;
-  this.forEach(function(element, i) {
-    tmp = cb(element, i);
-    if (tmp !== null && tmp !== undefined) {
-      ret.push(tmp);
-    }
-  });
-  return ret;
-};
-
-Array.prototype.filter = function(cb) {
+Array.prototype.filter = function(cb, thisArg) {
+  thisArg = thisArg || this;
   var ret = [];
   this.forEach(function(element, i) {
-    if (cb(element, i)) {
+    if (cb.apply(thisArg, [element, i])) {
       ret.push(element);
     }
   });

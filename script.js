@@ -16,7 +16,7 @@ window.onload = function() {
 
   if (tst === 0) {
     var colors = ["#97C757", "#57C7C4", "#5764C7", "#A457C7", "#C757B7", "#C75768", "#C78057", "#C7C557"];
-    colors = colors.map(CG5.colorArray);
+    colors = colors.map(CG5.colorFromString,CG5);
     var createBlock = function(color, i) {
       var view = new CG5.View([0,0,40,40]).setBackgroundColor(color).setCornerRadius(5);
       CG5.addView(view);
@@ -30,10 +30,8 @@ window.onload = function() {
           setTimeout(moveToRandomPoint, 300);
         }).go();
         //CG5.animate(animation, "_duration").setFrom(500).setTo(900).go();
-        /*
-        CG5.animate(view, "setBackgroundColor").setFrom(CG5.colorArray(view.backgroundColor())).setTo(colors.random())
+        CG5.animate(view, "setBackgroundColor").setFrom(view.backgroundColor().array()).setTo(colors.random().array())
           .setDuration(500).go();
-          */
       };
       setTimeout(moveToRandomPoint, 300);
     };

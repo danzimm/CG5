@@ -192,7 +192,7 @@ var CG5 = (function() {
         case 0:
           return this.pointZero;
         case 1:
-          return { x: arr[0], y: 0 };
+          return this.point(arr[0], 0);
         default:
           return this.point(arr[0], arr[1]);
       }
@@ -251,6 +251,7 @@ var CG5 = (function() {
 
   that.rectize = function(arr) {
     if (Array.isArray(arr)) {
+      var pnt, s;
       switch(arr) {
         case 0:
           return this.rectZero;
@@ -258,17 +259,23 @@ var CG5 = (function() {
           if (typeof arr[0] === "number") {
             return this.rect(arr[0],0,0,0);
           }
-          return { origin: this.pointize(arr[0]), size: this.sizeZero };
+          pnt = this.pointize(arr[0]);
+          s = this.sizeZero;
+          return this.rect(pnt.x, pnt.y, s.width, s.height);
         case 2:
           if (typeof arr[0] === "number") {
             return this.rect(arr[0], arr[1], 0,0);
           }
-          return { origin: this.pointize(arr[0]), size: this.sizeize(arr[1]) };
+          pnt = this.pointize(arr[0]);
+          s = this.sizeize(arr[1]);
+          return this.rect(pnt.x, pnt.y, s.width, s.height);
         case 3:
           if (typeof arr[0] === "number") {
             return this.rect(arr[0], arr[1], arr[2], 0);
           }
-          return { origin: this.pointize(arr[0]), size: this.sizeize(arr[1]) };
+          pnt = this.pointize(arr[0]);
+          s = this.sizeize(arr[1]);
+          return this.rect(pnt.x, pnt.y, s.width, s.height);
         default:
           return this.rect(arr[0], arr[1], arr[2], arr[3]);
       }
@@ -335,57 +342,83 @@ var CG5 = (function() {
     };
   };
   that.threeVectorZero = { x: 0, y: 0, z: 0 };
+
+  that.color = function(r,g,b,a) {
+    var that = {};
+    that.r = r;
+    that.g = g;
+    that.b = b;
+    that.a = typeof a === "number" ? a : 1;
+    dynamicProperty(that, "array", function(arg) {
+      if (arguments.length >= 1) {
+        return this.setArray.apply(this, arguments);
+      }
+      return [this.r,this.g,this.b,this.a];
+    }, function(arr) {
+      switch (arr.length) {
+        case 1:
+          this.r = arr[0];
+          break;
+        case 2:
+          this.r = arr[0];
+          this.g = arr[1];
+          break;
+        case 3:
+          this.r = arr[0];
+          this.g = arr[1];
+          this.b = arr[2];
+          break;
+        case 4:
+          this.r = arr[0];
+          this.g = arr[1];
+          this.b = arr[2];
+          this.a = arr[3];
+          break;
+      }
+    });
+    dynamicProperty(that, "string", function(arg) {
+      if (arguments.length >= 1) {
+        return this.setString.apply(this, arguments);
+      }
+      return "rgba(" + this.r + "," + this.g + "," + this.b + "," + this.a + ")";
+    }, function(color) {
+      var results, r, g, b, a;
+      if ((results = /#([a-fA-F0-9]{3})$/.exec(color)) !== null) {
+        r = parseInt(results[1][0] + results[1][0], 16);
+        g = parseInt(results[1][1] + results[1][1], 16);
+        b = parseInt(results[1][2] + results[1][2], 16);
+        a = 1;
+      } else if ((results = /#([a-fA-F0-9]{6})/.exec(color)) !== null) {
+        r = parseInt(results[1].substr(0,2), 16);
+        g = parseInt(results[1].substr(2,2), 16);
+        b = parseInt(results[1].substr(4,2), 16);
+        a = 1;
+      } else if ((results = /rgb\(\s*(\d+(?:\.\d*)?)\s*,\s*(\d+(?:\.\d*)?)\s*,\s*(\d+(?:\.\d*)?)\s*\)/.exec(color)) !== null) {
+        r = parseFloat(results[1]);
+        g = parseFloat(results[2]);
+        b = parseFloat(results[3]);
+        a = 1;
+      } else if ((results = /rgba\(\s*(\d+(?:\.\d*)?)\s*,\s*(\d+(?:\.\d*)?)\s*,\s*(\d+(?:\.\d*)?)\s*,\s*(\d+(?:\.\d*)?)\s*\)/.exec(color)) !== null) {
+        r = parseFloat(results[1]);
+        g = parseFloat(results[2]);
+        b = parseFloat(results[3]);
+        a = parseFloat(results[4]);
+      } 
+      this.r = r;
+      this.g = g;
+      this.b = b;
+      this.a = a;
+    });
+    return that;
+  };
+  that.colorFromArray = function(colorArray) {
+    return this.color(0,0,0,0).setArray(colorArray);
+  };
+  that.colorFromString = function(string) {
+    return this.color(0,0,0,0).setString(string);
+  };
   // }}}
 
-  // Utilities {{{
-  that.alphize = function(color, alpha) {
-    var results, r, g, b, a;
-    if ((results = /#([a-fA-F0-9]{3})$/.exec(color)) !== null) {
-      r = parseInt(results[1][0] + results[1][0], 16);
-      g = parseInt(results[1][1] + results[1][1], 16);
-      b = parseInt(results[1][2] + results[1][2], 16);
-    } else if ((results = /#([a-fA-F0-9]{6})/.exec(color)) !== null) {
-      r = parseInt(results[1].substr(0,2), 16);
-      g = parseInt(results[1].substr(2,2), 16);
-      b = parseInt(results[1].substr(4,2), 16);
-    } else if ((results = /rgb\((\d+(?:\.\d{0,})?), (\d+(?:\.\d{0,})?), (\d+(?:\.\d{0,})?)\)/) !== null) {
-      r = results[1];
-      g = results[2];
-      b = results[3];
-    } else if ((results = /rgba\((\d+(?:\.\d{0,})?), (\d+(?:\.\d{0,})?), (\d+(?:\.\d{0,})?), \d+(?:\.\d{0,})?\)/) !== null) {
-      r = results[1];
-      g = results[2];
-      b = results[3];
-    } 
-    return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
-  };
-  that.colorArray = function(color) {
-    var results, r, g, b, a;
-    if ((results = /#([a-fA-F0-9]{3})$/.exec(color)) !== null) {
-      r = parseInt(results[1][0] + results[1][0], 16);
-      g = parseInt(results[1][1] + results[1][1], 16);
-      b = parseInt(results[1][2] + results[1][2], 16);
-      a = 1;
-    } else if ((results = /#([a-fA-F0-9]{6})/.exec(color)) !== null) {
-      r = parseInt(results[1].substr(0,2), 16);
-      g = parseInt(results[1].substr(2,2), 16);
-      b = parseInt(results[1].substr(4,2), 16);
-      a = 1;
-    } else if ((results = /rgb\(\s*(\d+(?:\.\d*)?)\s*,\s*(\d+(?:\.\d*)?)\s*,\s*(\d+(?:\.\d*)?)\s*\)/.exec(color)) !== null) {
-      r = parseFloat(results[1]);
-      g = parseFloat(results[2]);
-      b = parseFloat(results[3]);
-      a = 1;
-    } else if ((results = /rgba\(\s*(\d+(?:\.\d*)?)\s*,\s*(\d+(?:\.\d*)?)\s*,\s*(\d+(?:\.\d*)?)\s*,\s*(\d+(?:\.\d*)?)\s*\)/.exec(color)) !== null) {
-      r = parseFloat(results[1]);
-      g = parseFloat(results[2]);
-      b = parseFloat(results[3]);
-      a = parseFloat(results[4]);
-    } 
-    return [r,g,b,a];
-  }
-  // }}}
-  
   // Gradients {{{
   that.colorStop = function(loc, col) {
     return {
@@ -432,7 +465,7 @@ var CG5 = (function() {
       start = [0.5, 0];
       finish = [0.5, 1];
     }
-    return this.linearGradient(start,finish).addColorStop(0, color).addColorStop(1, this.alphize(color, 0));
+    return this.linearGradient(start,finish).addColorStop(0, color).addColorStop(1, color.cascade(function() { this.alpha = 0; }));
   };
   that.radialGradient = function(start, finish, stops) {
     return {
@@ -449,7 +482,7 @@ var CG5 = (function() {
     };
   };
   that.singleColorRadialGradient = function(color) {
-    return this.radialGradient([0.5,0.5,0],[0.5,0.5,1]).addColorStop(0, color).addColorStop(1, this.alphize(color, 0));
+    return this.radialGradient([0.5,0.5,0],[0.5,0.5,1]).addColorStop(0, color).addColorStop(1, color.cascade(function() { this.alpha = 0; }));
   };
   // }}}
   
@@ -725,7 +758,7 @@ var CG5 = (function() {
     view.prototype.backgroundStyle = function() {
       switch(this.backgroundStyleType) {
         case 0:
-          return this.backgroundColor();
+          return this.backgroundColor().string();
         case 1:
           return this.linearGradient();
         case 2:
@@ -735,27 +768,28 @@ var CG5 = (function() {
       }
     };
 
-    syntheticProperty(view.prototype, "backgroundColor", null, function_hooks(function(bgColor) { // TODO: 2 color object
+    syntheticProperty(view.prototype, "backgroundColor", function_hooks(function(color) {
+      return color;
+    }, null), function_hooks(function(bgColor) { // TODO: 2 color object
       this.backgroundStyleType = 0;
       if (Array.isArray(bgColor)) {
         bgColor = bgColor.map(Math.floor);
-        switch(bgColor.length) {
-          case 1:
-            return "rgb(" + bgColor[0] + "," + bgColor[0] + "," + bgColor[0] + ")";
-          case 2:
-            return "rgb(" + bgColor[0] + "," + bgColor[1] + "," + bgColor[1] + ")";
-          case 3:
-            return "rgb(" + bgColor[0] + "," + bgColor[1] + "," + bgColor[2] + ")";
-          case 4:
-            return "rgba(" + bgColor[0] + "," + bgColor[1] + "," + bgColor[2] + "," + bgColor[3] + ")";
-          default:
-            return "rgba(0,0,0,0)";
-        }
+        return CG5.colorFromArray(bgColor);
+      }
+      if (typeof bgColor === "string") {
+        return CG5.colorFromString(bgColor);
       }
     }, function(bgCol) {
       this.setNeedsDisplay(true);
-    }), "rgba(0,0,0,0)");
-    syntheticProperty(view.prototype, "strokeColor", null, function_hooks(null, function(a) { this.setNeedsDisplay(true); }), null);
+    }), CG5.color(0,0,0,0));
+    syntheticProperty(view.prototype, "strokeColor", function_hooks(function(color) {
+      return color;
+    }, null), function_hooks(function(color) {
+      if (Array.isArray(color)) {
+        color.map(Math.floor);
+        return CG5.colorFromArray(color);
+      }
+    }, function(a) { this.setNeedsDisplay(true); }), CG5.color(0,0,0,0));
     syntheticProperty(view.prototype, "strokeWidth", null, function_hooks(null, function(a) { this.setNeedsDisplay(true); }), 0);
     syntheticProperty(view.prototype, "path", null, function_hooks(null, function(path) {
       this.setNeedsDisplay(true);
@@ -773,7 +807,7 @@ var CG5 = (function() {
       var finalX = rect.origin.x + grad.finish.x * rect.size.width, finalY = rect.origin.y + rect.size.height * grad.finish.y;
       var retval = ctx.createLinearGradient(startX, startY, finalX, finalY);
       grad.colorStops.forEach(function(colorstop) {
-        retval.addColorStop(colorstop.loc, colorstop.color);
+        retval.addColorStop(colorstop.loc, colorstop.color.string());
       });
       return retval;
     }, null), function_hooks(function(bgColor) {
@@ -788,7 +822,7 @@ var CG5 = (function() {
       var startR = (rect.size.width / 2) * grad.start.z, finalR = (rect.size.width / 2) * grad.finish.z;
       var retval = ctx.createRadialGradient(startX, startY, startR, finalX, finalY, finalR);
       grad.colorStops.forEach(function(colorstop) {
-        retval.addColorStop(colorstop.loc, colorstop.color);
+        retval.addColorStop(colorstop.loc, colorstop.color.string());
       });
       return retval;
     }, null), function_hooks(function(bgColor) {
@@ -853,15 +887,15 @@ var CG5 = (function() {
 
         ctx.closePath();
         ctx.fill();
-        if (this._strokeColor && this._strokeWidth) {
-          ctx.strokeStyle = this._strokeColor;
+        if (this._strokeWidth) {
+          ctx.strokeStyle = this.strokeColor();
           ctx.lineWidth = this._strokeWidth;
           ctx.stroke();
         }
       } else {
         ctx.fillRect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-        if (this._strokeColor && this._strokeWidth) {
-          ctx.strokeStyle = this._strokeColor;
+        if (this._strokeWidth) {
+          ctx.strokeStyle = this.strokeColor();
           ctx.lineWidth = this._strokeWidth;
           ctx.strokeRect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
         }
