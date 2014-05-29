@@ -12,7 +12,7 @@ window.onload = function() {
   var backgroundView = new CG5.View(CG5.rect(0,0,CG5.screen.size.width, CG5.screen.size.height)).setBackgroundColor("#C8C8C8");
   CG5.addView(backgroundView);
 
-  var tst = 0;
+  var tst = 1;
 
   if (tst === 0) {
     var colors = ["#97C757", "#57C7C4", "#5764C7", "#A457C7", "#C757B7", "#C75768", "#C78057", "#C7C557"];
@@ -85,6 +85,16 @@ window.onload = function() {
       mouseDown = false;
       CG5.animate(spotlightView, "cornerRadius").to(5).go();
     };
+    var MouseWheelHandler = function(event) {
+      console.log("Got delta: " + event.wheelDelta);
+      if (event.preventDefault) {
+        event.preventDefault();
+      }
+      event.returnValue = false;
+      return false;
+    };
+    window.addEventListener("mousewheel", MouseWheelHandler, false);
+    window.addEventListener("DOMMouseScroll", MouseWheelHandler, false);
   }
 };
 

@@ -18,7 +18,7 @@ where `[0,0,100,100]` stand for the rect of the view. You can do many other thin
 
 ## Roadmap
 - Add paths for views. In other words currently views can only be rectangles (of course you can create your own `drawRect` method in order to draw some other shape, but I want to make this easier), or rounded rectangles, but I want the views to be able to have any sort of boundary one would like (creating the boundaries with different types of curves, quadratic, cubic, etc.). Currently I have an idea how to do this, but need to figure out how to make a simpler API.
-- Shadows on views. Both inset and outset. Different colors, different sizes. This, at first glance to me is going to be very hard!
+- ScrollView. This is gunna take some work. Currently I see that I'm going to be using the mousewheel event, canceling it if I'm within a scrollview (means I'll have to implement some sort of `hitTest` function). Should be interesting to see how this works out... No idea how it'll work on mobile devices oh lord. Possibly going to add another `<canvas>` element and then taking the scrolling from the browser itself. This is probably favorable, but then I cannot have as cool of animations and the such. I would love input if anyone had any!
 
 ## File Structure
 Currently I have the `CG5` framework in the file `cg5.js` in the root of the repo. The file `script.js` is a testing file that I use (currently I have two tests). The `index.html` file is used with `script.js` to test the framework. The `fjs.js` script is a script that adds some convenience methods to arrays and objects.
