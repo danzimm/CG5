@@ -38,3 +38,7 @@ Thanks to [John Heaton](http://jheat.me) for teaching me a great bit about how j
 
 Thanks to all my other coder friends who have taught me a thing or two along the way.
 
+Thanks to Michael Deal for his brillant [article](http://www.html5rocks.com/en/tutorials/canvas/texteffects/) on working with the canvas.
+
+Thanks to the interval `[0,1]` being homeomorphic to any other interval `[a,b]` for real `a,b`.
+
