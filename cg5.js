@@ -768,9 +768,7 @@ var CG5 = (function() {
       }
     };
 
-    syntheticProperty(view.prototype, "backgroundColor", function_hooks(function(color) {
-      return color;
-    }, null), function_hooks(function(bgColor) { // TODO: 2 color object
+    syntheticProperty(view.prototype, "backgroundColor", null, function_hooks(function(bgColor) { // TODO: 2 color object
       this.backgroundStyleType = 0;
       if (Array.isArray(bgColor)) {
         bgColor = bgColor.map(Math.floor);
@@ -782,15 +780,41 @@ var CG5 = (function() {
     }, function(bgCol) {
       this.setNeedsDisplay(true);
     }), CG5.color(0,0,0,0));
-    syntheticProperty(view.prototype, "strokeColor", function_hooks(function(color) {
-      return color;
-    }, null), function_hooks(function(color) {
+    syntheticProperty(view.prototype, "strokeColor", null, function_hooks(function(color) {
       if (Array.isArray(color)) {
         color.map(Math.floor);
         return CG5.colorFromArray(color);
       }
+      if (typeof color === "string") {
+        return CG5.colorFromString(color);
+      }
     }, function(a) { this.setNeedsDisplay(true); }), CG5.color(0,0,0,0));
     syntheticProperty(view.prototype, "strokeWidth", null, function_hooks(null, function(a) { this.setNeedsDisplay(true); }), 0);
+
+    syntheticProperty(view.prototype, "shadowColor", null, function_hooks(function(color) {
+      if (Array.isArray(color)) {
+        color.map(Math.floor);
+        return CG5.colorFromArray(color);
+      }
+      if (typeof color === "string") {
+        return CG5.colorFromString(color);
+      }
+    }, function(a) { this.setNeedsDisplay(true); }), CG5.color(0,0,0,0));
+    syntheticProperty(view.prototype, "shadowBlur", null, null, 0);
+    syntheticProperty(view.prototype, "shadowOffset", null, null, CG5.point(0,0));
+    
+    syntheticProperty(view.prototype, "innerShadowColor", null, function_hooks(function(color) {
+      if (Array.isArray(color)) {
+        color.map(Math.floor);
+        return CG5.colorFromArray(color);
+      }
+      if (typeof color === "string") {
+        return CG5.colorFromString(color);
+      }
+    }, function(a) { this.setNeedsDisplay(true); }), CG5.color(0,0,0,0));
+    syntheticProperty(view.prototype, "innerShadowBlur", null, null, 0);
+    syntheticProperty(view.prototype, "innerShadowOffset", null, null, CG5.point(0,0));
+
     syntheticProperty(view.prototype, "path", null, function_hooks(null, function(path) {
       this.setNeedsDisplay(true);
     }), null);
@@ -870,36 +894,119 @@ var CG5 = (function() {
 
     view.prototype.drawRect = function(rect) {
       var ctx = CG5.context, cornerRadius;
+      ctx.save();
       ctx.fillStyle = this.backgroundStyle();
+
       if ((cornerRadius = this._cornerRadius) !== 0) {
         var topLine = rect.origin.y, leftLine = rect.origin.x, bottomLine = topLine + rect.size.height, rightLine = leftLine + rect.size.width;
         ctx.beginPath();
         
         ctx.moveTo(leftLine + cornerRadius, topLine);
-        ctx.lineTo(rightLine - cornerRadius, topLine);
-        ctx.arc(rightLine - cornerRadius, topLine + cornerRadius, cornerRadius, - Math.PI / 2, 0);
-        ctx.lineTo(rightLine, bottomLine - cornerRadius);
-        ctx.arc(rightLine - cornerRadius, bottomLine - cornerRadius, cornerRadius, 0, Math.PI / 2);
-        ctx.lineTo(leftLine + cornerRadius, bottomLine);
-        ctx.arc(leftLine + cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI / 2, Math.PI);
-        ctx.lineTo(leftLine, topLine + cornerRadius);
-        ctx.arc(leftLine + cornerRadius, topLine + cornerRadius, cornerRadius, Math.PI, 3 * Math.PI / 2);
+        ctx.arc(leftLine + cornerRadius, topLine + cornerRadius, cornerRadius, 3 * Math.PI / 2, Math.PI, true);
+        ctx.lineTo(leftLine, bottomLine - cornerRadius);
+        ctx.arc(leftLine + cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI, Math.PI / 2, true);
+        ctx.lineTo(rightLine - cornerRadius, bottomLine);
+        ctx.arc(rightLine - cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI / 2, 0, true);
+        ctx.lineTo(rightLine, topLine + cornerRadius);
+        ctx.arc(rightLine - cornerRadius, topLine + cornerRadius, cornerRadius, 0, 3 * Math.PI / 2, true);
+        ctx.lineTo(leftLine + cornerRadius, topLine);
 
-        ctx.closePath();
+        if (this._shadowBlur > 0) {
+          ctx.shadowBlur = this._shadowBlur;
+          ctx.shadowColor = this._shadowColor.string();
+          ctx.shadowOffsetX = this._shadowOffset.x;
+          ctx.shadowOffsetY = this._shadowOffset.y;
+        }
         ctx.fill();
+        
+        if (this._innerShadowBlur > 0) {
+
+          ctx.save();
+          ctx.fillStyle = "#000";
+          ctx.shadowColor = this._innerShadowColor.string();
+          ctx.shadowBlur = this._innerShadowBlur;
+          ctx.shadowOffsetX = this._innerShadowOffset.x;
+          ctx.shadowOffsetY = this._innerShadowOffset.y;
+
+          ctx.beginPath();
+
+          ctx.moveTo(leftLine + cornerRadius, topLine);
+          ctx.arc(leftLine + cornerRadius, topLine + cornerRadius, cornerRadius, 3 * Math.PI / 2, Math.PI, true);
+          ctx.lineTo(leftLine, bottomLine - cornerRadius);
+          ctx.arc(leftLine + cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI, Math.PI / 2, true);
+          ctx.lineTo(rightLine - cornerRadius, bottomLine);
+          ctx.arc(rightLine - cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI / 2, 0, true);
+          ctx.lineTo(rightLine, topLine + cornerRadius);
+          ctx.arc(rightLine - cornerRadius, topLine + cornerRadius, cornerRadius, 0, 3 * Math.PI / 2, true);
+          ctx.lineTo(leftLine + cornerRadius, topLine);
+          
+          ctx.clip();
+
+          ctx.beginPath();
+          ctx.rect(leftLine - 25, topLine - 25, rect.size.width + 50, rect.size.height + 50);
+
+          ctx.moveTo(leftLine + cornerRadius, topLine);
+          ctx.arc(leftLine + cornerRadius, topLine + cornerRadius, cornerRadius, 3 * Math.PI / 2, Math.PI, true);
+          ctx.lineTo(leftLine, bottomLine - cornerRadius);
+          ctx.arc(leftLine + cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI, Math.PI / 2, true);
+          ctx.lineTo(rightLine - cornerRadius, bottomLine);
+          ctx.arc(rightLine - cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI / 2, 0, true);
+          ctx.lineTo(rightLine, topLine + cornerRadius);
+          ctx.arc(rightLine - cornerRadius, topLine + cornerRadius, cornerRadius, 0, 3 * Math.PI / 2, true);
+          ctx.lineTo(leftLine + cornerRadius, topLine);
+
+          ctx.fill();
+          ctx.restore();
+        }
+
         if (this._strokeWidth) {
-          ctx.strokeStyle = this.strokeColor();
+          ctx.strokeStyle = this._strokeColor.string();
           ctx.lineWidth = this._strokeWidth;
           ctx.stroke();
         }
       } else {
+        if (this._shadowBlur > 0) {
+          ctx.shadowBlur = this._shadowBlur;
+          ctx.shadowColor = this._shadowColor.string();
+          ctx.shadowOffsetX = this._shadowOffset.x;
+          ctx.shadowOffsetY = this._shadowOffset.y;
+        }
         ctx.fillRect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+
+        if (this._innerShadowBlur > 0) {
+
+          ctx.save();
+          ctx.fillStyle = "#000";
+          ctx.shadowColor = this._innerShadowColor.string();
+          ctx.shadowBlur = this._innerShadowBlur;
+          ctx.shadowOffsetX = this._innerShadowOffset.x;
+          ctx.shadowOffsetY = this._innerShadowOffset.y;
+
+          ctx.beginPath();
+          ctx.rect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+          ctx.clip();
+
+          ctx.beginPath();
+          ctx.rect(rect.origin.x - 25, rect.origin.y - 25, rect.size.width + 50, rect.size.height + 50);
+
+          ctx.moveTo(rect.origin.x, rect.origin.y);
+          ctx.lineTo(rect.origin.x, rect.origin.y + rect.size.height);
+          ctx.lineTo(rect.origin.x + rect.size.width, rect.origin.y + rect.size.height);
+          ctx.lineTo(rect.origin.x + rect.size.width, rect.origin.y);
+          ctx.lineTo(rect.origin.x, rect.origin.y);
+
+          ctx.fill();
+          ctx.restore();
+
+        }
+
         if (this._strokeWidth) {
-          ctx.strokeStyle = this.strokeColor();
+          ctx.strokeStyle = this._strokeColor.string();
           ctx.lineWidth = this._strokeWidth;
           ctx.strokeRect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
         }
       }
+      ctx.restore();
     };
     
     dynamicProperty(view.prototype, "origin", function() {
@@ -967,6 +1074,7 @@ var CG5 = (function() {
   that.addView = function(view) {
     views.push(view);
     this.setNeedsDisplay(false);
+    return this;
   };
 
   that.hasView = function(view) {
@@ -979,10 +1087,32 @@ var CG5 = (function() {
       views.splice(index, 1);
       this.setNeedsDisplay(true);
     }
+    return this;
   };
+  
+  that.moveViewToFront = function(view) {
+    var index;
+    if ((index = views.indexOf(view)) !== -1) {
+      views.move(index,views.length-1);
+    }
+    return this;
+  };
+  that.moveViewToBack = function(view) {
+    var index;
+    if ((index = views.indexOf(view)) !== -1) {
+      views.move(index,0);
+    }
+    return this;
+  };
+  /*
+  that.moveViewInFrontOfView = function(viewa, viewb) {
+    // TODO: implement this
+  };
+  */
 
   that.setNeedsDisplay = function(forceAll) {
     GFXRunloop.addSource(CG5._displaySource(forceAll), GFXRunloop.SourceTypes.OneShot);
+    return this;
   };
   // }}}
 

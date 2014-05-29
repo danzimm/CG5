@@ -25,6 +25,11 @@ Array.prototype.random = function(nelm) {
   return ret;
 };
 
+// TODO: need to incorporate this into cg5 I guess, I don't like changing the prototypes of these default objects for the framework, though. Need to think of a better solution
+Array.prototype.move = function (from, to) {
+  this.splice(to, 0, this.splice(from, 1)[0]);
+};
+
 Object.prototype.flatten = function() {
   var that = this;
   return Object.getOwnPropertyNames(this).map(function(name) {
