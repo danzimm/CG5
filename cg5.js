@@ -723,14 +723,7 @@ var CG5 = (function() {
       GFXRunloop.addSource(this.source);
       if (!renderSource) {
         renderSource = CG5._displaySource(true);
-        GFXRunloop.addSource(renderSource);
-      } else {
-        GFXRunloop.addSource(renderSource); // ensure at bottom - probably should have a better method for this
-        // need to test this better, feels like a hack here. What happens if for a single loop we get two 
-        // renderSources because removeSource isn't called quick enough? Probably doubtful that that will happen but you never know!
-        // Need to see if I can break this I guess
-        // Would be best to just create a function of GFXRunloop to move the source...
-        GFXRunloop.removeSource(renderSource);
+        GFXRunloop.addSource(renderSource); // TODO: 3 should probably ensure this is the last thing done in the GFXRunloop...
       }
       animation.currentAnimations.push(this);
       return this;

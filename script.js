@@ -40,12 +40,12 @@ window.onload = function() {
         CG5.animate(view, "backgroundColor").setFrom(view.backgroundColor().array()).setTo(colors.random().array())
           .setDuration(900).go();
       };
-      setTimeout(moveToRandomPoint, 300);
+      setTimeout(moveToRandomPoint, 300 * i);
       return view;
     };
-    colors.map(createBlock);
-    /*
     colors.forEach(createBlock);
+    colors.forEach(createBlock);
+    /*
     colors.forEach(createBlock);
     colors.forEach(createBlock);
     colors.forEach(createBlock);
