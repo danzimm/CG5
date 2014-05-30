@@ -21,7 +21,7 @@ window.onload = function() {
     var createBlock = function(color, i) {
       var view = new CG5.View([0,0,100,100]).setBackgroundColor(color).setCornerRadius(0);
       
-      if (i % 2 === 0) {
+      if (i % 2 < 0) {
         view.setInnerShadowColor(CG5.color(0,0,0,1)).setInnerShadowBlur(5);
       } else {
         view.setShadowColor(CG5.color(0,0,0,1)).setShadowBlur(5);
@@ -37,8 +37,8 @@ window.onload = function() {
           .after(function() {
             setTimeout(moveToRandomPoint, 300);
         }).go();
-        //CG5.animate(view, "backgroundColor").setFrom(view.backgroundColor().array()).setTo(colors.random().array())
-        //  .setDuration(900).go();
+        CG5.animate(view, "backgroundColor").setFrom(view.backgroundColor().array()).setTo(colors.random().array())
+          .setDuration(900).go();
       };
       setTimeout(moveToRandomPoint, 300);
       return view;
