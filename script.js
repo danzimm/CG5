@@ -19,7 +19,7 @@ window.onload = function() {
     colors = colors.map(CG5.colorFromString,CG5);
 
     var createBlock = function(color, i) {
-      var view = new CG5.View([0,0,100,100]).setBackgroundColor(color).setCornerRadius(0);
+      var view = new CG5.View([0,0,100,100]).setBackgroundColor(color).setCornerRadius(5);
       
       if (i % 2 < 0) {
         view.setInnerShadowColor(CG5.color(0,0,0,1)).setInnerShadowBlur(5);

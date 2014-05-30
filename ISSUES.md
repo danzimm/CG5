@@ -6,6 +6,7 @@ This file will list the known issues. If you want one to especially be worked on
 
 - Animating views with inset shadows is slow
 - Animating views with shadows and cornerRadius in safari is slow. Somehow in chrome it's fine though
+- Animating lots of views
 - Race condition when adding a new animation when an animation already exists
 
 ## Views
