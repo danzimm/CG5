@@ -1,15 +1,4 @@
 
-Array.prototype.filter = function(cb, thisArg) {
-  thisArg = thisArg || this;
-  var ret = [];
-  this.forEach(function(element, i) {
-    if (cb.apply(thisArg, [element, i])) {
-      ret.push(element);
-    }
-  });
-  return ret;
-};
-
 Array.prototype.random = function(nelm) {
   nelm = nelm || 1;
   if (nelm <= 0) {
@@ -37,10 +26,17 @@ Object.prototype.flatten = function() {
   });
 };
 
+Object.prototype.map = function(cb, thisArg) {
+  thisArg = thisArg || this;
+  var that = this;
+  Object.getOwnPropertyNames(this).map(function(name) {
+    cb(name, that[name]);
+  });
+  return this;
+};
+
 Object.prototype.cascade = function(cb) {
   cb.apply(this);
   return this;
 };
-
-// TODO: object map, filter
 

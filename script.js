@@ -12,7 +12,7 @@ window.onload = function() {
   var backgroundView = new CG5.View(CG5.rect(0,0,CG5.screen.size.width, CG5.screen.size.height)).setBackgroundColor("#C8C8C8");
   CG5.addView(backgroundView);
 
-  var tst = 1;
+  var tst = 0;
 
   if (tst === 0) {
     var colors = ["#97C757", "#57C7C4", "#5764C7", "#A457C7", "#C757B7", "#C75768", "#C78057", "#C7C557"];
@@ -20,11 +20,13 @@ window.onload = function() {
 
     var createBlock = function(color, i) {
       var view = new CG5.View([0,0,100,100]).setBackgroundColor(color).setCornerRadius(0);
+      
       if (i % 2 === 0) {
         view.setInnerShadowColor(CG5.color(0,0,0,1)).setInnerShadowBlur(5);
       } else {
         view.setShadowColor(CG5.color(0,0,0,1)).setShadowBlur(5);
       }
+      
       CG5.addView(view);
       var moveToRandomPoint = function() {
         var radius = view.radius();
@@ -33,14 +35,15 @@ window.onload = function() {
         var animation = CG5.animate(view, "setCenter").setFrom(from)
           .setTo(to).setDuration(900).tweener(CG5.tweens.flatten().random(2))
           .after(function() {
-          setTimeout(moveToRandomPoint, 300);
+            setTimeout(moveToRandomPoint, 300);
         }).go();
-        CG5.animate(view, "backgroundColor").setFrom(view.backgroundColor().array()).setTo(colors.random().array())
-          .setDuration(500).go();
+        //CG5.animate(view, "backgroundColor").setFrom(view.backgroundColor().array()).setTo(colors.random().array())
+        //  .setDuration(900).go();
       };
       setTimeout(moveToRandomPoint, 300);
+      return view;
     };
-    colors.forEach(createBlock);
+    colors.map(createBlock);
     /*
     colors.forEach(createBlock);
     colors.forEach(createBlock);
@@ -85,6 +88,7 @@ window.onload = function() {
       mouseDown = false;
       CG5.animate(spotlightView, "cornerRadius").to(5).go();
     };
+    /*
     var MouseWheelHandler = function(event) {
       console.log("Got delta: " + event.wheelDelta);
       if (event.preventDefault) {
@@ -95,6 +99,7 @@ window.onload = function() {
     };
     window.addEventListener("mousewheel", MouseWheelHandler, false);
     window.addEventListener("DOMMouseScroll", MouseWheelHandler, false);
+    */
   }
 };
 

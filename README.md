@@ -1,6 +1,6 @@
 # CG5
 ## What?
-CG5 originally stood for CoreGraphics for HTML5 but quickly evolved into something else. CG5 aims to create a user interface sweet for the web. It contains classes for views and animations, allowing complex and intricate websites to be created.
+CG5 originally stood for CoreGraphics for HTML5 but quickly evolved into something else. CG5 aims to create a user interface suite for the web. It contains classes for views and animations, allowing complex and intricate websites to be created.
 ## Why?
 I personally don't like writing HTML or CSS (or any of the other languages that compile down to these languages). I personally like writing things while using full grown languages, such as javascript*. Thus I created this framework which allows creation of a robust website without the need to ever touch HTML or CSS.
 ## How?

@@ -61,10 +61,8 @@ var GFXRunloop = (function() {
       var source = sources[i];
       if (!source.queuedToStop) {
         source();
-        switch (sources[i].type) {
-          case 1:
-            runner.removeSource(sources[i]);
-            break;
+        if (source.type === 1) {
+          runner.removalQueue.push(source);
         }
       }
     }
@@ -489,6 +487,9 @@ var CG5 = (function() {
   // Animations {{{
   that._displaySource = function(all) {
     return function() {
+      /*if (all) {
+        that.context.clearRect(0,0,that.screen.size.width, that.screen.size.height);
+      }*/
       views.forEach(function(view) {
         if (all || view.needsDisplay) {
           view._drawRect(view.rect());
@@ -603,12 +604,14 @@ var CG5 = (function() {
       this.setFrom( (opts.hasOwnProperty("from") ? opts.from : goodTmp ? tmp : 0) ); // TODO: 3 init with array type?
       this.setChange( (opts.hasOwnProperty("to") ? opts.to - this.from() : (goodTmp ? tmp : 0)  - this.from()) );
     };
+    var renderSource = null;
+    animation.currentAnimations = [];
 
     animation.prototype.start = 0;
     syntheticProperty(animation.prototype, "duration", null, null, 300);
     syntheticProperty(animation.prototype, "tweener", null, null, CG5.tweens.quadInOut);
     syntheticProperty(animation.prototype, "keypath", null, null, "empty");
-    syntheticProperty(animation.prototype, "updater", null, null, CG5._displaySource(true));
+    syntheticProperty(animation.prototype, "updater", null, null, null);
     syntheticProperty(animation.prototype, "from", null, null, 0);
     syntheticProperty(animation.prototype, "change", null, null, 0);
     syntheticProperty(animation.prototype, "after", null, null, null);
@@ -665,7 +668,9 @@ var CG5 = (function() {
               ret.push(ani._tweener[i](time, ani._from[i], comp, ani._duration));
             });
             ani.target[ani._keypath](ret, true);
-            ani._updater();
+            if (ani._updater) {
+              ani._updater();
+            }
           };
         }
         return function() {
@@ -679,7 +684,9 @@ var CG5 = (function() {
             ret.push(ani._tweener[i](time, ani._from[i], comp, ani._duration));
           });
           ani.target[ani._keypath] = ret;
-          ani._updater();
+          if (ani._updater) {
+            ani._updater();
+          }
         };
       }
       if (setterBased) {
@@ -690,7 +697,9 @@ var CG5 = (function() {
             ani.stop();
           }
           ani.target[ani._keypath](ani._tweener(time, ani._from, ani._change, ani._duration), true);
-          ani._updater();
+          if (ani._updater) {
+            ani._updater();
+          }
         };
       }
       return function() {
@@ -700,7 +709,9 @@ var CG5 = (function() {
           ani.stop();
         }
         ani.target[ani._keypath] = ani._tweener(time, ani._from, ani._change, ani._duration);
-        ani._updater();
+        if (ani._updater) {
+          ani._updater();
+        }
       };
     };
     animation.prototype.go = function() {
@@ -710,6 +721,11 @@ var CG5 = (function() {
       this.start = Date.now();
       this.source = animation.createSource(this);
       GFXRunloop.addSource(this.source);
+      if (!renderSource) {
+        renderSource = CG5._displaySource(true);
+        GFXRunloop.addSource(renderSource);
+      }
+      animation.currentAnimations.push(this);
       return this;
     };
     animation.prototype.stop = function() {
@@ -720,10 +736,98 @@ var CG5 = (function() {
       if (this.after()) {
         this.after()();
       }
+      var index = animation.currentAnimations.indexOf(this);
+      if (index > -1) {
+        animation.currentAnimations.splice(index, 1);
+      }
+      if (animation.currentAnimations.length === 0) {
+        GFXRunloop.removeSource(renderSource);
+        renderSource = null;
+      }
       return this;
     };
     return animation;
   }(that));
+  // }}}
+
+  // CG5Path {{{
+  /*
+  that.Segment = (function(CG5) {
+    var segment = {};
+
+    segment.General = function(x,y) {
+      this.setPoint(x,y);
+    };
+    syntheticProperty(segment.General.prototype, "point", null, function_hooks(function(pnt, y) {
+      if (arguments.length === 1) {
+        return CG5.pointize(pnt);
+      } 
+      if (arguments.length === 2) {
+        return CG5.point(pnt,y);
+      } 
+      throw "Invalid arguments passed to setPoint";
+    }, null), CG5.point(0,0));
+    segment.General.prototype.drawInContext = function(ctx) {
+      this.draw(ctx);
+    };
+    segment.General.prototype.draw = function(ctx) {
+      throw "Override Segment.General.draw!";
+    };
+    function createSegmentNamed(name, properties, argsFunc) {
+      var deCapName = decapitalize(name);
+      segment[name] = function(x,y) {
+        this.setPoint(x,y);
+      };
+      segment[deCapName] = function() {
+        return new this[name].apply(this, arguments);
+      };
+      if (Array.isArray(properties)) {
+        properties.forEach(function(property) {
+          syntheticProperty(segment[name].prototype, property, null, null);
+        });
+      }
+      segment[name].prototype = Object.create(segment.General.prototype, {
+        draw: function(ctx) {
+          ctx[deCapName].apply(ctx, this.drawArgs());
+        },
+        drawArgs: argsFunc
+      });
+    }
+    createSegmentNamed("MoveTo", null, function() {
+      return this._point.array();
+    });
+    //createSegmentNamed("
+    return segment;
+  }(that));
+
+  that.path = function() {
+    return new this.Path.apply(this, arguments);
+  };
+  that.Path = (function(CG5) {
+    var segType;
+    var path = function() {
+      this.segments = [];
+    };
+    CG5.Segment.map(function(segmentName, segmentImp) {
+      if (segmentName.
+      path.prototype[segmentName] = function() {
+        this.segments.push(CG5.Segment[segmentName].apply(CG5.Segment, arguments));
+        return this;
+      };
+    });
+    path.prototype.addSegment = function(segment) {
+      this.segments.push(segment);
+      return this;
+    };
+    path.prototype.drawInContext = function(ctx) {
+      this.segments.forEach(function(segment) {
+        segment.drawInContext.apply(segment, [ctx]);
+      });
+      return this;
+    };
+    return path;
+  }(that));
+  */
   // }}}
   
   // CG5.View {{{
