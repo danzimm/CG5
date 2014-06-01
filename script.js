@@ -17,11 +17,13 @@ window.onload = function() {
   if (tst === 0) {
     var colors = ["#97C757", "#57C7C4", "#5764C7", "#A457C7", "#C757B7", "#C75768", "#C78057", "#C7C557"];
     colors = colors.map(CG5.colorFromString,CG5);
+    var path = CG5.path().moveTo(0.25,0.0669873).lineTo(0.75,0.0669873).lineTo(1,0.5).lineTo(0.75,0.933013).lineTo(0.25,0.933013).lineTo(0,0.5).lineTo(0.25,0.0669873);
+    var rpath = CG5.path().moveTo(0.25,0.0669873).lineTo(0,0.5).lineTo(0.25,0.933013).lineTo(0.75,0.933013).lineTo(1,0.5).lineTo(0.75,0.0669873).lineTo(0.25,0.0669873);
 
     var createBlock = function(color, i) {
-      var view = new CG5.View([0,0,100,100]).setBackgroundColor(color).setCornerRadius(5);
+      var view = new CG5.View([0,0,50,50]).setBackgroundColor(color).setPath(path).setReversePath(rpath);
       
-      if (i % 2 < 0) {
+      if (i % 2 === 0) {
         view.setInnerShadowColor(CG5.color(0,0,0,1)).setInnerShadowBlur(5);
       } else {
         view.setShadowColor(CG5.color(0,0,0,1)).setShadowBlur(5);
@@ -44,8 +46,8 @@ window.onload = function() {
       return view;
     };
     colors.forEach(createBlock);
-    colors.forEach(createBlock);
     /*
+    colors.forEach(createBlock);
     colors.forEach(createBlock);
     colors.forEach(createBlock);
     colors.forEach(createBlock);
@@ -53,7 +55,7 @@ window.onload = function() {
   }
 
   if (tst === 1) {
-    var spotlightView = new CG5.View([0,0,40,40]).setBackgroundColor("#97C757").setCornerRadius(5);//.setStrokeWidth(2);//.setRadialGradient(CG5.singleColorRadialGradient("#97C757"));
+    var spotlightView = new CG5.View([0,0,40,40]).setBackgroundColor("#97C757").setCornerRadius(0.125);
     CG5.addView(spotlightView);
     var timerID = -1;
     var mousePosition = { x: -1, y: -1 };
@@ -69,11 +71,11 @@ window.onload = function() {
         clearTimeout(timerID);
       } catch(e) {}
       radius = spotlightView.radius();
-      spotlightView.setCornerRadius(radius);
+      spotlightView.setCornerRadius(0.5);
       spotlightView.setOrigin(CG5.point(clix - radius, cliy - radius));
       if (!mouseDown) {
         timerID = setTimeout(function() {
-          CG5.animate(spotlightView, "cornerRadius").to(5).go();
+          CG5.animate(spotlightView, "cornerRadius").to(0.125).go();
         }, 300);
       }
     };
@@ -82,11 +84,11 @@ window.onload = function() {
       try {
         clearTimeout(timerID);
       } catch(e) {}
-      spotlightView.setCornerRadius(spotlightView.radius());
+      spotlightView.setCornerRadius(0.5);
     };
     window.onmouseup = function(event) {
       mouseDown = false;
-      CG5.animate(spotlightView, "cornerRadius").to(5).go();
+      CG5.animate(spotlightView, "cornerRadius").to(0.125).go();
     };
     /*
     var MouseWheelHandler = function(event) {

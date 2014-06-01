@@ -751,83 +751,242 @@ var CG5 = (function() {
   // }}}
 
   // CG5Path {{{
-  /*
-  that.Segment = (function(CG5) {
-    var segment = {};
-
-    segment.General = function(x,y) {
-      this.setPoint(x,y);
+  that.Segment = {};
+  that.Segment.MoveTo = (function(CG5) {
+    var segment = function(x,y) {
+      this.setPoint([x,y]);
     };
-    syntheticProperty(segment.General.prototype, "point", null, function_hooks(function(pnt, y) {
-      if (arguments.length === 1) {
-        return CG5.pointize(pnt);
-      } 
-      if (arguments.length === 2) {
-        return CG5.point(pnt,y);
-      } 
-      throw "Invalid arguments passed to setPoint";
+    syntheticProperty(segment.prototype, "point", null, function_hooks(function(pnt) {
+     if (Array.isArray(pnt)) {
+       return CG5.pointize(pnt);
+     }
     }, null), CG5.point(0,0));
-    segment.General.prototype.drawInContext = function(ctx) {
-      this.draw(ctx);
+    segment.prototype.drawInContext = function(ctx, rect) {
+      var x = this._point.x, y = this._point.y;
+      x = x * rect.size.width + rect.origin.x;
+      y = y * rect.size.height + rect.origin.y;
+      ctx.moveTo(x,y);
+      return this;
     };
-    segment.General.prototype.draw = function(ctx) {
-      throw "Override Segment.General.draw!";
+    return segment;
+  }(that));
+  that.Segment.LineTo = (function(CG5) {
+    var segment = function(x,y) {
+      this.setPoint([x,y]);
     };
-    function createSegmentNamed(name, properties, argsFunc) {
-      var deCapName = decapitalize(name);
-      segment[name] = function(x,y) {
-        this.setPoint(x,y);
-      };
-      segment[deCapName] = function() {
-        return new this[name].apply(this, arguments);
-      };
-      if (Array.isArray(properties)) {
-        properties.forEach(function(property) {
-          syntheticProperty(segment[name].prototype, property, null, null);
-        });
-      }
-      segment[name].prototype = Object.create(segment.General.prototype, {
-        draw: function(ctx) {
-          ctx[deCapName].apply(ctx, this.drawArgs());
-        },
-        drawArgs: argsFunc
-      });
-    }
-    createSegmentNamed("MoveTo", null, function() {
-      return this._point.array();
-    });
-    //createSegmentNamed("
+    syntheticProperty(segment.prototype, "point", null, function_hooks(function(pnt) {
+     if (Array.isArray(pnt)) {
+       return CG5.pointize(pnt);
+     }
+    }, null), CG5.point(0,0));
+    segment.prototype.drawInContext = function(ctx, rect) {
+      var x = this._point.x, y = this._point.y;
+      x = x * rect.size.width + rect.origin.x;
+      y = y * rect.size.height + rect.origin.y;
+      ctx.lineTo(x,y);
+      return this;
+    };
+    return segment;
+  }(that));
+  that.Segment.Arc = (function(CG5) {
+    var segment = function(x,y,r,sa,ea,anti) {
+      this.setPoint([x,y]).setRadius(r).setStartAngle(sa).setEndAngle(ea).setAntiClockwise(anti);
+    };
+    syntheticProperty(segment.prototype, "point", null, function_hooks(function(pnt) {
+     if (Array.isArray(pnt)) {
+       return CG5.pointize(pnt);
+     }
+    }, null), CG5.point(0,0));
+    syntheticProperty(segment.prototype, "radius", null, null, 0);
+    syntheticProperty(segment.prototype, "startAngle", null, null, 0);
+    syntheticProperty(segment.prototype, "endAngle", null, null, 0);
+    syntheticProperty(segment.prototype, "antiClockwise", null, null, 0);
+    segment.prototype.drawInContext = function(ctx, rect) {
+      var x = this._point.x, y = this._point.y, r = this._radius, sa = this._startAngle, ea = this._endAngle, anti = this._antiClockwise;
+      x = x * rect.size.width + rect.origin.x;
+      y = y * rect.size.height + rect.origin.y;
+      r = r * ( rect.size.width + rect.size.height ) / 2; 
+      ctx.arc(x,y,r,sa,ea,anti);
+      return this;
+    };
+    return segment;
+  }(that));
+  that.Segment.ArcTo = (function(CG5) {
+    var segment = function(x,y, x1, y1, r) {
+      this.setPoint([x,y]).setEndPoint([x1,y1]).setRadius(r);
+    };
+    syntheticProperty(segment.prototype, "point", null, function_hooks(function(pnt) {
+     if (Array.isArray(pnt)) {
+       return CG5.pointize(pnt);
+     }
+    }, null), CG5.point(0,0));
+    syntheticProperty(segment.prototype, "endPoint", null, function_hooks(function(pnt) {
+     if (Array.isArray(pnt)) {
+       return CG5.pointize(pnt);
+     }
+    }, null), CG5.point(0,0));
+    syntheticProperty(segment.prototype, "radius", null, null, 0);
+    segment.prototype.drawInContext = function(ctx, rect) {
+      var x = this._point.x, y = this._point.y, x1 = this._endPoint.x, y1 = this._endPoint.y, r = this._radius;
+      x = x * rect.size.width + rect.origin.x;
+      y = y * rect.size.height + rect.origin.y;
+      x1 = x1 * rect.size.width + rect.origin.x;
+      y1 = y1 * rect.size.height + rect.origin.y;
+      r = r * ( rect.size.width + rect.size.height ) / 2;
+      ctx.arcTo(x,y,x1,y1,r);
+      return this;
+    };
+    return segment;
+  }(that));
+  that.Segment.BezierCurveTo = (function(CG5) {
+    var segment = function(cx,cy,cx1,cy1,x,y) {
+      this.setControlPoint([cx,cy]).setControlPointTwo([cx1,cy1]).setPoint([x,y]);
+    };
+    syntheticProperty(segment.prototype, "point", null, function_hooks(function(pnt) {
+     if (Array.isArray(pnt)) {
+       return CG5.pointize(pnt);
+     }
+    }, null), CG5.point(0,0));
+    syntheticProperty(segment.prototype, "controlPoint", null, function_hooks(function(pnt) {
+     if (Array.isArray(pnt)) {
+       return CG5.pointize(pnt);
+     }
+    }, null), CG5.point(0,0));
+    syntheticProperty(segment.prototype, "controlPointTwo", null, function_hooks(function(pnt) {
+     if (Array.isArray(pnt)) {
+       return CG5.pointize(pnt);
+     }
+    }, null), CG5.point(0,0));
+    segment.prototype.drawInContext = function(ctx, rect) {
+      var cx = this._controlPoint.x, cy = this._controlPoint.y, cx1 = this._controlPointTwo.x, cy1 = this._controlPointTwo.y, x = this._point.x, y = this._point.y;
+      cx = cx * rect.size.width + rect.origin.x;
+      cy = cy * rect.size.height + rect.origin.y;
+      cx1 = cx1 * rect.size.width + rect.origin.x;
+      cy1 = cy1 * rect.size.height + rect.origin.y;
+      x = x * rect.size.width + rect.origin.x;
+      y = y * rect.size.height + rect.origin.y;
+      ctx.bezierCurveTo(cx,cy,cx1,cy1,x,y);
+      return this;
+    };
+    return segment;
+  }(that));
+  that.Segment.QuadraticCurveTo = (function(CG5) {
+    var segment = function(cx, cy, x,y) {
+      this.setControlPoint([cx,cy]).setPoint([x,y]);
+    };
+    syntheticProperty(segment.prototype, "point", null, null, CG5.point(0,0));
+    syntheticProperty(segment.prototype, "point", null, function_hooks(function(pnt) {
+     if (Array.isArray(pnt)) {
+       return CG5.pointize(pnt);
+     }
+    }, null), CG5.point(0,0));
+    syntheticProperty(segment.prototype, "controlPoint", null, function_hooks(function(pnt) {
+     if (Array.isArray(pnt)) {
+       return CG5.pointize(pnt);
+     }
+    }, null), CG5.point(0,0));
+    segment.prototype.drawInContext = function(ctx, rect) {
+      var cx = this._controlPoint.x, cy = this._controlPoint.y, x = this._point.x, y = this._point.y;
+      cx = cx * rect.size.width + rect.origin.x;
+      cy = cy * rect.size.height + rect.origin.y;
+      x = x * rect.size.width + rect.origin.x;
+      y = y * rect.size.height + rect.origin.y;
+      ctx.quadraticCurveTo(cx,cy,x,y);
+      return this;
+    };
     return segment;
   }(that));
 
   that.path = function() {
-    return new this.Path.apply(this, arguments);
+    return new this.Path();
   };
   that.Path = (function(CG5) {
     var segType;
     var path = function() {
-      this.segments = [];
+      this.segments = []; // Not sure if I should put in prototype or what
     };
-    CG5.Segment.map(function(segmentName, segmentImp) {
-      if (segmentName.
-      path.prototype[segmentName] = function() {
-        this.segments.push(CG5.Segment[segmentName].apply(CG5.Segment, arguments));
+    var functions = ["moveTo", "lineTo", "arc", "arcTo", "bezierCurveTo", "quadraticCurveTo"];
+    functions.forEach(function(func) {
+      var cap = capitalize(func);
+      path.prototype[func] = function(a,b,c,d,e,f) {
+        this.segments.push(new CG5.Segment[cap](a,b,c,d,e,f));
         return this;
       };
+    });
+    Object.defineProperty(path.prototype, "length", {
+      get: function() {
+        return this.segments.length;
+      }
     });
     path.prototype.addSegment = function(segment) {
       this.segments.push(segment);
       return this;
     };
-    path.prototype.drawInContext = function(ctx) {
+    path.prototype.segment = function(index) {
+      return this.segments[index];
+    };
+    path.prototype.drawInContext = function(ctx,rect) {
       this.segments.forEach(function(segment) {
-        segment.drawInContext.apply(segment, [ctx]);
+        segment.drawInContext(ctx,rect);
       });
       return this;
     };
+    path.rect = function() {
+      return CG5.path().rect(0,0,1,1);
+    };
+    path.rectReversed = function(rect) {
+      return CG5.path().moveTo(0,0).lineTo(0,1).lineTo(1,1).lineTo(1,0).lineTo(0,0);
+    };
+    path.rectRounded = function(topLeft, topRight, bottomLeft, bottomRight) {
+      var retval = CG5.path().moveTo(topLeft, 0)
+        .lineTo(1 - topRight, 0)
+        .arc(1 - topRight, topRight, topRight, 3 * Math.PI / 2, 0)
+        .lineTo(1, 1 - bottomRight)
+        .arc(1 - bottomRight, 1 - bottomRight, bottomRight, 0, Math.PI / 2)
+        .lineTo(bottomLeft, 1)
+        .arc(bottomLeft, 1 - bottomLeft, bottomLeft, Math.PI / 2, Math.PI)
+        .lineTo(0, topLeft)
+        .arc(topLeft, topLeft, topLeft, Math.PI, 3 * Math.PI / 2);
+      retval.setRadius = function(radius) {
+        this.segment(0).point().x = radius;
+        this.segment(1).point().x = 1 - radius;
+        this.segment(2).setRadius(radius).setPoint([1 - radius, radius]);
+        this.segment(3).point().y = 1 - radius;
+        this.segment(4).setRadius(radius).setPoint([1 - radius, 1 - radius]);
+        this.segment(5).point().x = radius;
+        this.segment(6).setRadius(radius).setPoint([radius, 1 - radius]);
+        this.segment(7).point().y = radius;
+        this.segment(8).setRadius(radius).setPoint([radius, radius]);
+      };
+      return retval;
+    };
+    path.rectRoundedReversed = function(topLeft, topRight, bottomLeft, bottomRight) {
+      var retval = CG5.path().moveTo(topLeft, 0)
+        .arc(topLeft, topLeft, topLeft, 3 * Math.PI / 2, Math.PI, true)
+        .lineTo(0, 1 - bottomLeft)
+        .arc(bottomLeft, 1 - bottomLeft, bottomLeft, Math.PI, Math.PI / 2, true)
+        .lineTo(1 - bottomRight, 1)
+        .arc(1 - bottomRight, 1 - bottomRight, bottomRight, Math.PI / 2, 0, true)
+        .lineTo(1, topRight)
+        .arc(1 - topRight, topRight, topRight, 0, 3 * Math.PI / 2, true)
+        .lineTo(topLeft, 0);
+
+      retval.setRadius = function(radius) {
+        this.segment(0).point().x = radius;
+        this.segment(1).setRadius(radius).setPoint([radius,radius]);
+        this.segment(2).point().y = 1 - radius;
+        this.segment(3).setRadius(radius).setPoint([radius, 1 - radius]);
+        this.segment(4).point().x = 1 - radius;
+        this.segment(5).setRadius(radius).setPoint([1 - radius, 1 - radius]);
+        this.segment(6).point().y = radius;
+        this.segment(7).setRadius(radius).setPoint([1 - radius, radius]);
+        this.segment(8).point().x = radius;
+      };
+      return retval;
+    };
     return path;
   }(that));
-  */
+
   // }}}
   
   // CG5.View {{{
@@ -922,10 +1081,18 @@ var CG5 = (function() {
     syntheticProperty(view.prototype, "path", null, function_hooks(null, function(path) {
       this.setNeedsDisplay(true);
     }), null);
+    syntheticProperty(view.prototype, "reversePath", null, function_hooks(null, function(path) {
+      this.setNeedsDisplay(true);
+    }), null);
     syntheticProperty(view.prototype, "cornerRadius", null, function_hooks(function(radius) {
       if (arguments.length === 1) {
         this.stopAnimating("cornerRadius");
       }
+      if (!this._cornerRadiusPath) {
+        this._cornerRadiusPath = CG5.Path.rectRoundedReversed(radius, radius, radius, radius);
+      }
+      this._cornerRadiusPath.setRadius(radius);
+      this.setReversePath(null).setPath(this._cornerRadiusPath);
     }, function(radius) {
       this.setNeedsDisplay(true);
     }), 0);
@@ -1000,116 +1167,51 @@ var CG5 = (function() {
       var ctx = CG5.context, cornerRadius;
       ctx.save();
       ctx.fillStyle = this.backgroundStyle();
+      
+      var drawPath = this._path ? this._path.drawInContext.bind(this._path, ctx, rect) : function() {
+        ctx.rect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+      };
+      var drawPathReverse = this._reversePath ? this._reversePath.drawInContext.bind(this._reversePath, ctx, rect) : drawPath;
+      var topLine = rect.origin.y, leftLine = rect.origin.x, bottomLine = topLine + rect.size.height, rightLine = leftLine + rect.size.width;
 
-      if ((cornerRadius = this._cornerRadius) !== 0) {
-        var topLine = rect.origin.y, leftLine = rect.origin.x, bottomLine = topLine + rect.size.height, rightLine = leftLine + rect.size.width;
-        ctx.beginPath();
-        
-        ctx.moveTo(leftLine + cornerRadius, topLine);
-        ctx.arc(leftLine + cornerRadius, topLine + cornerRadius, cornerRadius, 3 * Math.PI / 2, Math.PI, true);
-        ctx.lineTo(leftLine, bottomLine - cornerRadius);
-        ctx.arc(leftLine + cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI, Math.PI / 2, true);
-        ctx.lineTo(rightLine - cornerRadius, bottomLine);
-        ctx.arc(rightLine - cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI / 2, 0, true);
-        ctx.lineTo(rightLine, topLine + cornerRadius);
-        ctx.arc(rightLine - cornerRadius, topLine + cornerRadius, cornerRadius, 0, 3 * Math.PI / 2, true);
-        ctx.lineTo(leftLine + cornerRadius, topLine);
-
-        if (this._shadowBlur > 0) {
-          ctx.shadowBlur = this._shadowBlur;
-          ctx.shadowColor = this._shadowColor.string();
-          ctx.shadowOffsetX = this._shadowOffset.x;
-          ctx.shadowOffsetY = this._shadowOffset.y;
-        }
-        ctx.fill();
-        
-        if (this._innerShadowBlur > 0) {
-
-          ctx.save();
-          ctx.fillStyle = "#000";
-          ctx.shadowColor = this._innerShadowColor.string();
-          ctx.shadowBlur = this._innerShadowBlur;
-          ctx.shadowOffsetX = this._innerShadowOffset.x;
-          ctx.shadowOffsetY = this._innerShadowOffset.y;
-
-          ctx.beginPath();
-
-          ctx.moveTo(leftLine + cornerRadius, topLine);
-          ctx.arc(leftLine + cornerRadius, topLine + cornerRadius, cornerRadius, 3 * Math.PI / 2, Math.PI, true);
-          ctx.lineTo(leftLine, bottomLine - cornerRadius);
-          ctx.arc(leftLine + cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI, Math.PI / 2, true);
-          ctx.lineTo(rightLine - cornerRadius, bottomLine);
-          ctx.arc(rightLine - cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI / 2, 0, true);
-          ctx.lineTo(rightLine, topLine + cornerRadius);
-          ctx.arc(rightLine - cornerRadius, topLine + cornerRadius, cornerRadius, 0, 3 * Math.PI / 2, true);
-          ctx.lineTo(leftLine + cornerRadius, topLine);
-          
-          ctx.clip();
-
-          ctx.beginPath();
-          ctx.rect(leftLine - 25, topLine - 25, rect.size.width + 50, rect.size.height + 50);
-
-          ctx.moveTo(leftLine + cornerRadius, topLine);
-          ctx.arc(leftLine + cornerRadius, topLine + cornerRadius, cornerRadius, 3 * Math.PI / 2, Math.PI, true);
-          ctx.lineTo(leftLine, bottomLine - cornerRadius);
-          ctx.arc(leftLine + cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI, Math.PI / 2, true);
-          ctx.lineTo(rightLine - cornerRadius, bottomLine);
-          ctx.arc(rightLine - cornerRadius, bottomLine - cornerRadius, cornerRadius, Math.PI / 2, 0, true);
-          ctx.lineTo(rightLine, topLine + cornerRadius);
-          ctx.arc(rightLine - cornerRadius, topLine + cornerRadius, cornerRadius, 0, 3 * Math.PI / 2, true);
-          ctx.lineTo(leftLine + cornerRadius, topLine);
-
-          ctx.fill();
-          ctx.restore();
-        }
-
-        if (this._strokeWidth) {
-          ctx.strokeStyle = this._strokeColor.string();
-          ctx.lineWidth = this._strokeWidth;
-          ctx.stroke();
-        }
-      } else {
-        if (this._shadowBlur > 0) {
-          ctx.shadowBlur = this._shadowBlur;
-          ctx.shadowColor = this._shadowColor.string();
-          ctx.shadowOffsetX = this._shadowOffset.x;
-          ctx.shadowOffsetY = this._shadowOffset.y;
-        }
-        ctx.fillRect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-
-        if (this._innerShadowBlur > 0) {
-
-          ctx.save();
-          ctx.fillStyle = "#000";
-          ctx.shadowColor = this._innerShadowColor.string();
-          ctx.shadowBlur = this._innerShadowBlur;
-          ctx.shadowOffsetX = this._innerShadowOffset.x;
-          ctx.shadowOffsetY = this._innerShadowOffset.y;
-
-          ctx.beginPath();
-          ctx.rect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-          ctx.clip();
-
-          ctx.beginPath();
-          ctx.rect(rect.origin.x - 25, rect.origin.y - 25, rect.size.width + 50, rect.size.height + 50);
-
-          ctx.moveTo(rect.origin.x, rect.origin.y);
-          ctx.lineTo(rect.origin.x, rect.origin.y + rect.size.height);
-          ctx.lineTo(rect.origin.x + rect.size.width, rect.origin.y + rect.size.height);
-          ctx.lineTo(rect.origin.x + rect.size.width, rect.origin.y);
-          ctx.lineTo(rect.origin.x, rect.origin.y);
-
-          ctx.fill();
-          ctx.restore();
-
-        }
-
-        if (this._strokeWidth) {
-          ctx.strokeStyle = this._strokeColor.string();
-          ctx.lineWidth = this._strokeWidth;
-          ctx.strokeRect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-        }
+      ctx.beginPath();
+      drawPath();
+      if (this._shadowBlur > 0) {
+        ctx.shadowBlur = this._shadowBlur;
+        ctx.shadowColor = this._shadowColor.string();
+        ctx.shadowOffsetX = this._shadowOffset.x;
+        ctx.shadowOffsetY = this._shadowOffset.y;
       }
+      ctx.fill();
+      if (this._strokeWidth) {
+        ctx.strokeStyle = this._strokeColor.string();
+        ctx.lineWidth = this._strokeWidth;
+        ctx.stroke();
+      }
+
+      if (this._innerShadowBlur > 0) {
+        ctx.save();
+        ctx.fillStyle = "#000";
+        ctx.shadowColor = this._innerShadowColor.string();
+        ctx.shadowBlur = this._innerShadowBlur;
+        ctx.shadowOffsetX = this._innerShadowOffset.x;
+        ctx.shadowOffsetY = this._innerShadowOffset.y;
+
+        ctx.beginPath();
+
+        drawPath();
+
+        ctx.clip();
+
+        ctx.beginPath();
+        ctx.rect(leftLine - 25, topLine - 25, rect.size.width + 50, rect.size.height + 50);
+        
+        drawPathReverse();
+        
+        ctx.fill();
+        ctx.restore();
+      }
+
       ctx.restore();
     };
     
