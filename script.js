@@ -21,9 +21,9 @@ window.onload = function() {
     var rpath = CG5.path().moveTo(0.25,0.0669873).lineTo(0,0.5).lineTo(0.25,0.933013).lineTo(0.75,0.933013).lineTo(1,0.5).lineTo(0.75,0.0669873).lineTo(0.25,0.0669873);
 
     var createBlock = function(color, i) {
-      var view = new CG5.View([0,0,50,50]).setBackgroundColor(color).setPath(path).setReversePath(rpath);
+      var view = new CG5.View([0,0,100,100]).setBackgroundColor(color).setPath(path).setReversePath(rpath);
       
-      if (i % 2 === 0) {
+      if (i % 2 < 0) {
         view.setInnerShadowColor(CG5.color(0,0,0,1)).setInnerShadowBlur(5);
       } else {
         view.setShadowColor(CG5.color(0,0,0,1)).setShadowBlur(5);
@@ -39,9 +39,16 @@ window.onload = function() {
           .after(function() {
             setTimeout(moveToRandomPoint, 300);
         }).go();
+
         CG5.animate(view, "backgroundColor").setFrom(view.backgroundColor().array()).setTo(colors.random().array())
           .setDuration(900).go();
       };
+      var speed = Math.floor(Math.random() * 800) + 200;
+      function rotate() {
+        CG5.animate(view, "rotation").setFrom(0).setTo(2 * Math.PI).setDuration(speed)
+          .tweener(CG5.tweens.linear).after(rotate).go();
+      }
+      rotate();
       setTimeout(moveToRandomPoint, 300 * i);
       return view;
     };

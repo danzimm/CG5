@@ -1084,6 +1084,9 @@ var CG5 = (function() {
     syntheticProperty(view.prototype, "reversePath", null, function_hooks(null, function(path) {
       this.setNeedsDisplay(true);
     }), null);
+    syntheticProperty(view.prototype, "rotation", null, function_hooks(null, function(path) {
+      this.setNeedsDisplay(true);
+    }), 0);
     syntheticProperty(view.prototype, "cornerRadius", null, function_hooks(function(radius) {
       if (arguments.length === 1) {
         this.stopAnimating("cornerRadius");
@@ -1166,6 +1169,11 @@ var CG5 = (function() {
     view.prototype.drawRect = function(rect) {
       var ctx = CG5.context, cornerRadius;
       ctx.save();
+      if (this._rotation !== 0) {
+        ctx.translate(rect.origin.x + rect.size.width/2, rect.origin.y + rect.size.height/2);
+        ctx.rotate(this._rotation);
+        ctx.translate(-rect.origin.x - rect.size.width/2, -rect.origin.y - rect.size.height/2);
+      }
       ctx.fillStyle = this.backgroundStyle();
       
       var drawPath = this._path ? this._path.drawInContext.bind(this._path, ctx, rect) : function() {
@@ -1315,7 +1323,6 @@ var CG5 = (function() {
     // TODO: implement this
   };
   */
-
   that.setNeedsDisplay = function(forceAll) {
     GFXRunloop.addSource(CG5._displaySource(forceAll), GFXRunloop.SourceTypes.OneShot);
     return this;
